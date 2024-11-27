@@ -6,12 +6,18 @@ const BlogContext = React.createContext();
 const blogReduceer = (state, action) => {
     switch (action.type)
     {
+        case 'edit_blogpost':
+            return state.map((entry) => {
+                return entry.id === action.payload.id ? action.payload : entry;
+            });
         case "add_blogpost":
             return [...state, {
                 id: Math.floor(Math.random() * 99999),
                 title :  action.payload.title,
                 content: action.payload.content
             }];
+        case "delete_blogpost":
+            return state.filter((blogpost) => blogpost.id !== action.payload);
         default:
             return state;
     }
@@ -21,7 +27,10 @@ const blogReduceer = (state, action) => {
 const addBlogPost = (dispatch) => {
     return (title, content, callback) => {
         dispatch({ type: "add_blogpost", payload: {title, content} });
-        callback();
+        if (callback)
+        {
+            callback();
+        }
     }
 }
 
@@ -31,9 +40,22 @@ const deleteBlogPost = dispatch => {
     }
 }
 
+const editBlogPost = dispatch => {
+    return (id, title, content, callback) => {
+        dispatch({
+            type: 'edit_blogpost',
+            payload: {id, title, content}
+        });
+        if (callback)
+        {
+            callback();
+        }
+    }
+}
+
 export const { Context, Provider } = createDataContext(
     blogReduceer,
-    { addBlogPost, deleteBlogPost }, 
+    { addBlogPost, deleteBlogPost, editBlogPost }, 
     []
 ) 
 
